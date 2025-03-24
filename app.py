@@ -101,24 +101,38 @@ def records():
     except (FileNotFoundError, json.JSONDecodeError):
         attendance_data = {}
     
-    # Load enrollment data to map IDs to names
+    # Load enrollment data to map IDs to names and classes
     try:
         with open(ENROLLMENTS_FILE, 'r') as f:
             enrollments = json.load(f)
-            # Create a dictionary mapping ID to name
-            id_to_name = {entry['id']: entry['name'] for entry in enrollments}
+            # Create dictionaries mapping ID to name and class
+            id_to_info = {entry['id']: {'name': entry['name'], 'class_id': entry.get('class_id', 'default')} 
+                         for entry in enrollments}
     except (FileNotFoundError, json.JSONDecodeError):
         enrollments = []
-        id_to_name = {}
+        id_to_info = {}
+    
+    # Load classes for class name lookup
+    try:
+        with open(CLASSES_FILE, 'r') as f:
+            classes = json.load(f)
+            class_names = {c['id']: c['name'] for c in classes}
+    except (FileNotFoundError, json.JSONDecodeError):
+        class_names = {'default': 'Default Class'}
     
     # Process attendance records for display
     formatted_records = []
     for date, records in attendance_data.items():
         for record in records:
             person_id = record['id']
+            person_info = id_to_info.get(person_id, {'name': f"Unknown ({person_id})", 'class_id': 'default'})
+            class_id = record.get('class_id', person_info['class_id'])
+            
             formatted_records.append({
-                'name': id_to_name.get(person_id, f"Unknown ({person_id})"),
+                'name': person_info['name'],
                 'id': person_id,
+                'class_id': class_id,
+                'class_name': class_names.get(class_id, 'Default Class'),
                 'date': date,
                 'time': record['time']
             })
