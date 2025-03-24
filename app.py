@@ -687,43 +687,109 @@ def query_attendance():
     try:
         data = request.get_json()
         query = data.get('query', '').lower()
+        class_id = data.get('class_id')
 
-        # Load attendance data
+        # Load all necessary data
         with open(ATTENDANCE_FILE, 'r') as f:
             attendance_data = json.load(f)
-        
-        # Load enrollments for name lookup
         with open(ENROLLMENTS_FILE, 'r') as f:
             enrollments = json.load(f)
-            id_to_name = {e['id']: e['name'] for e in enrollments}
+        with open(CLASSES_FILE, 'r') as f:
+            classes = json.load(f)
+            class_names = {c['id']: c['name'] for c in classes}
 
         today = datetime.now().strftime('%Y-%m-%d')
-        
-        if 'who was present' in query and 'today' in query:
-            if today in attendance_data:
-                present_ids = [r['id'] for r in attendance_data[today]]
-                names = [id_to_name.get(id, f"Unknown ({id})") for id in present_ids]
-                return jsonify({'success': True, 'response': f"Present today: {', '.join(names)}"})
-            return jsonify({'success': True, 'response': "No attendance records for today"})
+
+        # If asking about classes, return available options
+        if 'which classes' in query or 'list classes' in query:
+            class_list = [f"- {c['name']}" for c in classes]
+            return jsonify({
+                'success': True,
+                'response': "Available classes:\n" + "\n".join(class_list),
+                'requires_class': False
+            })
+
+        # Handle class-specific attendance queries
+        if ('who was present' in query or 'who was absent' in query) and not class_id:
+            return jsonify({
+                'success': True,
+                'response': "Please select a class:",
+                'requires_class': True,
+                'classes': [{'id': c['id'], 'name': c['name']} for c in classes]
+            })
+
+        # Total students query
+        if 'total student' in query or 'how many student' in query:
+            if class_id:
+                class_students = [e for e in enrollments if e.get('class_id') == class_id]
+                class_name = class_names.get(class_id, 'Unknown Class')
+                return jsonify({
+                    'success': True,
+                    'response': f"Total students in {class_name}: {len(class_students)}"
+                })
+            total = len(enrollments)
+            return jsonify({
+                'success': True,
+                'response': f"Total students enrolled: {total}"
+            })
+
+        # Student names query
+        if 'student names' in query or 'list students' in query:
+            if class_id:
+                class_students = [e for e in enrollments if e.get('class_id') == class_id]
+                class_name = class_names.get(class_id, 'Unknown Class')
+                names = [f"- {e['name']}" for e in class_students]
+                return jsonify({
+                    'success': True,
+                    'response': f"Students in {class_name}:\n" + "\n".join(names)
+                })
+            return jsonify({
+                'success': True,
+                'response': "Please select a class:",
+                'requires_class': True,
+                'classes': [{'id': c['id'], 'name': c['name']} for c in classes]
+            })
+
+        # Present/Absent queries with class filter
+        if class_id and today in attendance_data:
+            class_enrollments = [e for e in enrollments if e.get('class_id') == class_id]
+            class_name = class_names.get(class_id, 'Unknown Class')
             
-        elif 'who was absent' in query and 'today' in query:
-            if today in attendance_data:
-                present_ids = [r['id'] for r in attendance_data[today]]
-                absent_ids = [e['id'] for e in enrollments if e['id'] not in present_ids]
-                names = [id_to_name.get(id, f"Unknown ({id})") for id in absent_ids]
-                return jsonify({'success': True, 'response': f"Absent today: {', '.join(names)}"})
-            return jsonify({'success': True, 'response': "No attendance records for today"})
-            
-        elif 'attendance trend' in query:
-            total_enrolled = len(enrollments)
-            dates = sorted(attendance_data.keys(), reverse=True)[:7]  # Last 7 days
-            if dates:
-                trends = [f"{date}: {len(attendance_data[date])}/{total_enrolled} present" for date in dates]
-                return jsonify({'success': True, 'response': "Recent attendance trends:\n" + "\n".join(trends)})
-            return jsonify({'success': True, 'response': "No recent attendance records found"})
-            
-        else:
-            return jsonify({'success': True, 'response': "I can help you with:\n- Who was present today?\n- Who was absent today?\n- Show attendance trends"})
+            if 'who was present' in query:
+                present_ids = [r['id'] for r in attendance_data[today] if r.get('class_id') == class_id]
+                names = [e['name'] for e in class_enrollments if e['id'] in present_ids]
+                if names:
+                    return jsonify({
+                        'success': True,
+                        'response': f"Present today in {class_name}:\n- " + "\n- ".join(names)
+                    })
+                return jsonify({
+                    'success': True,
+                    'response': f"No students present today in {class_name}"
+                })
+                
+            elif 'who was absent' in query:
+                present_ids = [r['id'] for r in attendance_data[today] if r.get('class_id') == class_id]
+                names = [e['name'] for e in class_enrollments if e['id'] not in present_ids]
+                if names:
+                    return jsonify({
+                        'success': True,
+                        'response': f"Absent today in {class_name}:\n- " + "\n- ".join(names)
+                    })
+                return jsonify({
+                    'success': True,
+                    'response': f"No students absent today in {class_name}"
+                })
+
+        # Show help message for unknown queries
+        return jsonify({
+            'success': True,
+            'response': "I can help you with:\n- Who was present today?\n- Who was absent today?\n- Show attendance trends\n- Total students\n- List students\n- List classes"
+        })
+
+    except Exception as e:
+        logger.exception("Error processing chatbot query")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
     except Exception as e:
         logger.exception("Error processing chatbot query")
