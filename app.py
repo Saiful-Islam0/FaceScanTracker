@@ -507,7 +507,7 @@ def get_analytics():
         logger.exception("Error generating analytics")
         return jsonify({'success': False, 'error': str(e)}), 500
 
-@app.route('/export/attendance/csv')
+@app.route('/export_attendance_csv')
 def export_attendance_csv():
     try:
         # Optional filters
@@ -573,7 +573,7 @@ def export_attendance_csv():
         flash('Error exporting data. Please try again.', 'error')
         return redirect(url_for('records'))
 
-@app.route('/export/attendance/pdf')
+@app.route('/export_attendance_pdf')
 def export_attendance_pdf():
     try:
         # Optional filters
@@ -683,7 +683,7 @@ def export_attendance_pdf():
         flash('Error exporting data. Please try again.', 'error')
         return redirect(url_for('records'))
 
-@app.route('/charts/attendance_by_date.png')
+@app.route('/attendance_by_date_chart')
 def attendance_by_date_chart():
     try:
         # Load attendance data
@@ -731,7 +731,7 @@ def attendance_by_date_chart():
         
         return Response(output.getvalue(), mimetype='image/png')
 
-@app.route('/charts/enrollment_by_class.png')
+@app.route('/enrollment_by_class_chart')
 def enrollment_by_class_chart():
     try:
         # Load enrollments
