@@ -50,6 +50,11 @@
                             <i class="bi bi-bar-chart me-1"></i> Analytics
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link rounded {% if request.path == '/chatbot' %}active bg-primary-subtle{% endif %}" href="{{ url_for('chatbot') }}">
+                            <i class="bi bi-chat-dots me-1"></i> AI Assistant
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>

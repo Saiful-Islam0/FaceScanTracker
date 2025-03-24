@@ -1,0 +1,65 @@
+
+{% extends "layout.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>AI Attendance Assistant</h2>
+    <div class="card">
+        <div class="card-body" id="chat-container" style="height: 400px; overflow-y: auto;">
+            <div id="chat-messages"></div>
+        </div>
+    </div>
+    <div class="input-group mt-3">
+        <input type="text" id="user-input" class="form-control" placeholder="Ask about attendance (e.g., 'Who was present today?')">
+        <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script>
+function sendMessage() {
+    const input = document.getElementById('user-input');
+    const query = input.value.trim();
+    if (!query) return;
+
+    // Display user message
+    appendMessage('You: ' + query, 'text-end');
+    
+    // Send to backend
+    fetch('/api/attendance/query', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ query: query })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            appendMessage('Assistant: ' + data.response, 'text-start');
+        } else {
+            appendMessage('Error: ' + data.error, 'text-start text-danger');
+        }
+    })
+    .catch(error => {
+        appendMessage('Error: Failed to get response', 'text-start text-danger');
+    });
+
+    input.value = '';
+}
+
+function appendMessage(message, className) {
+    const container = document.getElementById('chat-messages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'mb-2 ' + className;
+    messageDiv.textContent = message;
+    container.appendChild(messageDiv);
+    container.scrollTop = container.scrollHeight;
+}
+
+// Handle Enter key
+document.getElementById('user-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        sendMessage();
+    }
+});
+</script>
+{% endblock %}

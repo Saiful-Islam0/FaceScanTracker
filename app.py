@@ -678,6 +678,10 @@ def export_attendance_csv():
         return redirect(url_for('records'))
 
 @app.route('/export_attendance_pdf')
+@app.route('/chatbot')
+def chatbot():
+    return render_template('chatbot.html')
+
 def export_attendance_pdf():
     try:
         # Optional filters
