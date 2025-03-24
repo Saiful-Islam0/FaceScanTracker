@@ -1,5 +1,8 @@
 // Load attendance records when visiting the records page
 document.addEventListener('DOMContentLoaded', () => {
+    // Load classes for the class filter
+    loadClasses();
+    
     // Filter attendance records by date
     const dateFilter = document.getElementById('dateFilter');
     
@@ -10,11 +13,20 @@ document.addEventListener('DOMContentLoaded', () => {
         dateFilter.value = formattedDate;
         
         // Apply filter when date changes
-        dateFilter.addEventListener('change', filterRecordsByDate);
-        
-        // Initial filter
-        filterRecordsByDate();
+        dateFilter.addEventListener('change', filterRecords);
     }
+    
+    // Apply filter when class changes
+    const classFilter = document.getElementById('classFilter');
+    if (classFilter) {
+        classFilter.addEventListener('change', filterRecords);
+    }
+    
+    // Set up export buttons
+    setupExportButtons();
+    
+    // Initial filter
+    filterRecords();
 });
 
 // Filter attendance records by date

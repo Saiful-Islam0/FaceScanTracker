@@ -24,7 +24,19 @@
                         <input type="text" class="form-control" id="nameInput" placeholder="Enter your name" required>
                     </div>
                     
-                    <div class="text-center">
+                    <div class="mb-3">
+                        <label for="classSelect" class="form-label">Class</label>
+                        <select class="form-select" id="classSelect" required>
+                            <option value="default">Default Class</option>
+                            <!-- Additional classes will be loaded dynamically -->
+                        </select>
+                        <div class="form-text">Select the class for this person</div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('classes') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-plus-circle me-1"></i> Manage Classes
+                        </a>
                         <button type="submit" id="enrollButton" class="btn btn-success" disabled>
                             <i class="fas fa-user-plus me-2"></i>Enroll Face
                         </button>

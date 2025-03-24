@@ -34,8 +34,18 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/classes' %}active{% endif %}" href="/classes">
+                            <i class="fas fa-users me-1"></i> Classes
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link {% if request.path == '/records' %}active{% endif %}" href="/records">
                             <i class="fas fa-clipboard-list me-1"></i> Records
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/analytics' %}active{% endif %}" href="/analytics">
+                            <i class="fas fa-chart-bar me-1"></i> Analytics
                         </a>
                     </li>
                 </ul>
