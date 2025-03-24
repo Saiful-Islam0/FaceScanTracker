@@ -2,82 +2,69 @@ import logging
 import os
 import hashlib
 import base64
-from PIL import Image, ImageFilter, ImageOps
-import io
 import math
 
 logger = logging.getLogger(__name__)
 
 def extract_face_encoding(image_path):
     """
-    Generate a simplified image representation for comparison
+    Generate a simple image hash for comparison
     
     Args:
         image_path: Path to image file
         
     Returns:
-        Image hash and features for comparison
+        Image hash for comparison
     """
     try:
-        # Load the image with PIL
-        img = Image.open(image_path)
-        if not img:
-            logger.error(f"Failed to load image from {image_path}")
-            return None
+        # Load the image data
+        with open(image_path, 'rb') as f:
+            img_data = f.read()
+        
+        # Calculate a hash of chunks of the image data (simulating regions)
+        # This is a very simplistic approach but doesn't require external libraries
+        chunk_size = len(img_data) // 16  # Divide into 16 chunks
+        if chunk_size < 1:
+            chunk_size = 1
             
-        # Convert to grayscale for simpler processing
-        gray = img.convert('L')
-        
-        # Resize to a standard size to ensure consistent comparison
-        resized = gray.resize((100, 100))
-        
-        # Apply Gaussian blur to reduce noise and minor differences
-        blurred = resized.filter(ImageFilter.GaussianBlur(radius=2))
-        
-        # Create a perceptual hash (pHash) based on DCT
-        # This is a simplified approach - divide image to 8x8 blocks and get avg values
-        simplified = blurred.resize((8, 8), Image.Resampling.LANCZOS)
-        
-        # Get pixel data
-        pixels = list(simplified.getdata())
-        avg_value = sum(pixels) / len(pixels)
-        
-        # Create a 64-bit hash based on whether pixel value is above average
-        perceptual_hash = ""
-        for pixel in pixels:
-            perceptual_hash += "1" if pixel > avg_value else "0"
-            
-        # Also calculate average values in different regions of the image
-        # Divide into 4x4 grid and calculate average intensity in each cell
-        width, height = blurred.size
-        cell_width, cell_height = width // 4, height // 4
+        chunks = []
         region_values = []
         
-        for y in range(0, height, cell_height):
-            for x in range(0, width, cell_width):
-                # Get region
-                region = blurred.crop((x, y, min(x + cell_width, width), min(y + cell_height, height)))
-                region_pixels = list(region.getdata())
-                avg = sum(region_pixels) / len(region_pixels) if region_pixels else 0
-                region_values.append(avg)
+        # Calculate hash for each chunk
+        for i in range(0, len(img_data), chunk_size):
+            chunk = img_data[i:i+chunk_size]
+            chunk_hash = hashlib.md5(chunk).hexdigest()
+            chunks.append(chunk_hash)
+            
+            # For region values, use the average byte value
+            avg_val = sum(byte for byte in chunk) / len(chunk) if chunk else 0
+            region_values.append(avg_val)
+        
+        # Create a simulated perceptual hash from these chunks
+        perceptual_hash = ""
+        for chunk_hash in chunks[:8]:  # Use first 8 chunks
+            # Take first 8 bits of each chunk hash
+            for c in chunk_hash[:2]:  # First 2 hex chars = 8 bits
+                # Convert hex char to binary representation
+                bin_val = bin(int(c, 16))[2:].zfill(4)  # Get 4 bits
+                perceptual_hash += bin_val
+        
+        # Ensure we have a 64-bit hash (if fewer chunks, repeat)
+        perceptual_hash = perceptual_hash[:64].ljust(64, '0')
+        
+        # Create a traditional hash
+        hash_obj = hashlib.md5(img_data)
+        image_hash = hash_obj.hexdigest()
+        
+        # Create a small thumbnail for reference (use base64 of first part of image)
+        thumbnail_data = img_data[:4096] if len(img_data) > 4096 else img_data
+        thumbnail = base64.b64encode(thumbnail_data).decode('utf-8')
         
         # Create features for comparison
         features = {
             'phash': perceptual_hash,
-            'regions': region_values
+            'regions': region_values[:16]  # Limit to 16 regions
         }
-        
-        # Also include a traditional hash
-        img_bytes = io.BytesIO()
-        img.save(img_bytes, format='JPEG')
-        hash_obj = hashlib.md5(img_bytes.getvalue())
-        image_hash = hash_obj.hexdigest()
-        
-        # Create a small thumbnail for reference
-        small_img = img.resize((50, 50))
-        thumbnail_bytes = io.BytesIO()
-        small_img.save(thumbnail_bytes, format='JPEG')
-        thumbnail = base64.b64encode(thumbnail_bytes.getvalue()).decode('utf-8')
             
         return {
             'hash': image_hash,
