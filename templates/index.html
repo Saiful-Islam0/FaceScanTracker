@@ -1,0 +1,54 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 offset-lg-2">
+        <h1 class="text-center page-title">Attendance Tracking</h1>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-camera me-2"></i>Face Recognition
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="text-center mb-3">Position your face in the camera frame and click the button to mark attendance.</p>
+                
+                <div class="video-container">
+                    <video id="videoElement" autoplay></video>
+                </div>
+                
+                <div class="controls">
+                    <button id="captureButton" class="btn btn-primary" onclick="captureFace()" disabled>
+                        <i class="fas fa-camera me-2"></i>Capture & Recognize
+                    </button>
+                </div>
+                
+                <div id="recognitionResult" class="recognition-result">
+                    <p class="text-center text-muted">Recognition results will appear here</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>Instructions
+                </h5>
+            </div>
+            <div class="card-body">
+                <ol>
+                    <li>Make sure your face is clearly visible in the camera.</li>
+                    <li>Good lighting helps with recognition accuracy.</li>
+                    <li>Click the "Capture & Recognize" button to mark your attendance.</li>
+                    <li>If you're not recognized, please enroll in the system first.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/camera.js') }}"></script>
+{% endblock %}

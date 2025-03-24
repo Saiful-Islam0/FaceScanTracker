@@ -1,0 +1,122 @@
+/* Additional styles beyond the Bootstrap theme */
+
+.video-container {
+    width: 100%;
+    max-width: 640px;
+    margin: 0 auto;
+    position: relative;
+}
+
+#videoElement, #enrollmentVideo {
+    width: 100%;
+    height: auto;
+    background-color: #1a1a1a;
+    border-radius: 5px;
+}
+
+.controls {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.recognition-result {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.recognition-success {
+    background-color: rgba(25, 135, 84, 0.2);
+    border: 1px solid var(--bs-success);
+}
+
+.recognition-warning {
+    background-color: rgba(255, 193, 7, 0.2);
+    border: 1px solid var(--bs-warning);
+}
+
+.recognition-error {
+    background-color: rgba(220, 53, 69, 0.2);
+    border: 1px solid var(--bs-danger);
+}
+
+.enrollment-form {
+    max-width: 640px;
+    margin: 20px auto;
+}
+
+.capture-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    font-size: 24px;
+    z-index: 10;
+    border-radius: 5px;
+}
+
+.capture-countdown {
+    background-color: var(--bs-primary);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.capture-complete {
+    background-color: var(--bs-success);
+    padding: 10px 20px;
+    border-radius: 5px;
+}
+
+.card {
+    margin-bottom: 20px;
+    background-color: rgba(55, 55, 55, 0.3);
+    border: 1px solid rgba(100, 100, 100, 0.3);
+}
+
+.page-title {
+    margin-bottom: 30px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.attendance-table {
+    margin-top: 20px;
+}
+
+.enrollment-list {
+    margin-top: 20px;
+}
+
+.nav-tabs .nav-link {
+    color: var(--bs-light);
+}
+
+.nav-tabs .nav-link.active {
+    background-color: rgba(55, 55, 55, 0.3);
+    color: var(--bs-white);
+    border-color: rgba(100, 100, 100, 0.3);
+}
+
+.camera-error {
+    color: var(--bs-danger);
+    text-align: center;
+    padding: 20px;
+    background-color: rgba(220, 53, 69, 0.1);
+    border-radius: 5px;
+    margin-top: 20px;
+}

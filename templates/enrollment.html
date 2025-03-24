@@ -1,0 +1,61 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 offset-lg-2">
+        <h1 class="text-center page-title">Face Enrollment</h1>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-user-plus me-2"></i>Enroll New Face
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="text-center mb-3">Enter your name and capture your face to enroll in the system.</p>
+                
+                <div class="video-container">
+                    <video id="enrollmentVideo" autoplay></video>
+                </div>
+                
+                <form id="enrollmentForm" class="enrollment-form">
+                    <div class="mb-3">
+                        <label for="nameInput" class="form-label">Full Name</label>
+                        <input type="text" class="form-control" id="nameInput" placeholder="Enter your name" required>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button type="submit" id="enrollButton" class="btn btn-success" disabled>
+                            <i class="fas fa-user-plus me-2"></i>Enroll Face
+                        </button>
+                    </div>
+                </form>
+                
+                <div id="enrollmentResult" class="mt-3"></div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-users me-2"></i>Enrolled People
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="enrollmentList" class="enrollment-list">
+                    <div class="text-center">
+                        <div class="spinner-border text-secondary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="text-muted mt-2">Loading enrollments...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/enrollment.js') }}"></script>
+{% endblock %}
