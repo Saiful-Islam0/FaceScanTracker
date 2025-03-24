@@ -1,53 +1,151 @@
-/* Additional styles beyond the Bootstrap theme */
+/* Modern & Colorful Styles for FaceScan Track */
 
+:root {
+    --primary-gradient: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    --secondary-gradient: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    --success-gradient: linear-gradient(135deg, #1cc88a 0%, #169a6b 100%);
+    --info-gradient: linear-gradient(135deg, #36b9cc 0%, #258391 100%);
+    --warning-gradient: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%);
+    --danger-gradient: linear-gradient(135deg, #e74a3b 0%, #c72f1e 100%);
+    --dark-gradient: linear-gradient(135deg, #5a5c69 0%, #373840 100%);
+    --purple-gradient: linear-gradient(135deg, #9c27b0 0%, #673ab7 100%);
+    --teal-gradient: linear-gradient(135deg, #20c997 0%, #0ca678 100%);
+    --orange-gradient: linear-gradient(135deg, #fd7e14 0%, #e05e00 100%);
+}
+
+body {
+    background-color: #1e1e2f;
+}
+
+/* Page Headers */
+.page-title {
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    font-weight: 600;
+    position: relative;
+}
+
+.page-title::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100px;
+    height: 2px;
+    background: var(--primary-gradient);
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, #4e73df 0%, #224abe 30%, #9c27b0 70%, #673ab7 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-fill-color: transparent;
+}
+
+/* Video Controls */
 .video-container {
     width: 100%;
     max-width: 640px;
     margin: 0 auto;
     position: relative;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    border-radius: 10px;
+    overflow: hidden;
 }
 
 #videoElement, #enrollmentVideo {
     width: 100%;
     height: auto;
-    background-color: #1a1a1a;
-    border-radius: 5px;
+    background-color: #1e1e2f;
+    border-radius: 10px;
+    border: 2px solid rgba(13, 110, 253, 0.2);
 }
 
 .controls {
     margin-top: 20px;
     display: flex;
     justify-content: center;
-    gap: 10px;
+    gap: 15px;
 }
 
+.controls .btn {
+    transition: all 0.3s ease;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-weight: 500;
+}
+
+.controls .btn-primary {
+    background: var(--primary-gradient);
+    border: none;
+}
+
+.controls .btn-success {
+    background: var(--success-gradient);
+    border: none;
+}
+
+.controls .btn-danger {
+    background: var(--danger-gradient);
+    border: none;
+}
+
+/* Recognition Results */
 .recognition-result {
     margin-top: 20px;
-    padding: 15px;
-    border-radius: 5px;
+    padding: 20px;
+    border-radius: 10px;
     text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .recognition-success {
-    background-color: rgba(25, 135, 84, 0.2);
-    border: 1px solid var(--bs-success);
+    background: linear-gradient(135deg, rgba(25, 135, 84, 0.1) 0%, rgba(25, 135, 84, 0.2) 100%);
+    border-left: 4px solid var(--bs-success);
 }
 
 .recognition-warning {
-    background-color: rgba(255, 193, 7, 0.2);
-    border: 1px solid var(--bs-warning);
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 193, 7, 0.2) 100%);
+    border-left: 4px solid var(--bs-warning);
 }
 
 .recognition-error {
-    background-color: rgba(220, 53, 69, 0.2);
-    border: 1px solid var(--bs-danger);
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.1) 0%, rgba(220, 53, 69, 0.2) 100%);
+    border-left: 4px solid var(--bs-danger);
 }
 
+/* Enrollment Form */
 .enrollment-form {
     max-width: 640px;
     margin: 20px auto;
 }
 
+.form-control, .form-select {
+    border-radius: 10px;
+    padding: 12px 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: rgba(30, 30, 47, 0.8);
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: rgba(13, 110, 253, 0.5);
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
+    background-color: rgba(30, 30, 47, 0.9);
+}
+
+.form-label {
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #e0e0e0;
+}
+
+/* Camera Overlay */
 .capture-overlay {
     position: absolute;
     top: 0;
@@ -57,66 +155,230 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.6);
     color: white;
     font-size: 24px;
     z-index: 10;
-    border-radius: 5px;
+    border-radius: 10px;
 }
 
 .capture-countdown {
-    background-color: var(--bs-primary);
-    width: 60px;
-    height: 60px;
+    background: var(--primary-gradient);
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 28px;
+    font-size: 36px;
     font-weight: bold;
+    box-shadow: 0 0 20px rgba(13, 110, 253, 0.4);
 }
 
 .capture-complete {
-    background-color: var(--bs-success);
-    padding: 10px 20px;
-    border-radius: 5px;
+    background: var(--success-gradient);
+    padding: 15px 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(25, 135, 84, 0.4);
+    font-weight: 600;
 }
 
+/* Cards */
 .card {
-    margin-bottom: 20px;
-    background-color: rgba(55, 55, 55, 0.3);
-    border: 1px solid rgba(100, 100, 100, 0.3);
+    margin-bottom: 25px;
+    background-color: #2a2d3e;
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
 }
 
-.page-title {
-    margin-bottom: 30px;
-    padding-bottom: 10px;
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 7px 20px rgba(0, 0, 0, 0.12);
+}
+
+.card-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.card-footer {
+    background-color: rgba(0, 0, 0, 0.03);
+    padding: 15px 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Tables */
+.table {
+    background-color: #2a2d3e;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 20px;
+}
+
+.table thead th {
+    background-color: rgba(13, 110, 253, 0.1);
+    color: white;
+    font-weight: 600;
+    padding: 15px;
+    border-bottom: 2px solid rgba(13, 110, 253, 0.2);
+}
+
+.table tbody td {
+    padding: 12px 15px;
+    vertical-align: middle;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.table tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+/* Tabs */
+.nav-tabs {
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.attendance-table {
-    margin-top: 20px;
-}
-
-.enrollment-list {
-    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 .nav-tabs .nav-link {
-    color: var(--bs-light);
+    color: #e0e0e0;
+    border-radius: 10px 10px 0 0;
+    padding: 10px 20px;
+    margin-right: 5px;
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: rgba(255, 255, 255, 0.05);
+    background-color: rgba(13, 110, 253, 0.05);
 }
 
 .nav-tabs .nav-link.active {
-    background-color: rgba(55, 55, 55, 0.3);
-    color: var(--bs-white);
-    border-color: rgba(100, 100, 100, 0.3);
+    background-color: #2a2d3e;
+    color: var(--bs-primary);
+    border-color: rgba(255, 255, 255, 0.1);
+    border-bottom-color: #2a2d3e;
+    font-weight: 500;
 }
 
+/* Alerts & Notifications */
+.alert {
+    border-radius: 10px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    border: none;
+}
+
+.alert-success {
+    background: linear-gradient(135deg, rgba(25, 135, 84, 0.1) 0%, rgba(25, 135, 84, 0.2) 100%);
+    border-left: 4px solid var(--bs-success);
+    color: #d2f4de;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.1) 0%, rgba(220, 53, 69, 0.2) 100%);
+    border-left: 4px solid var(--bs-danger);
+    color: #f8d7da;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, rgba(13, 202, 240, 0.1) 0%, rgba(13, 202, 240, 0.2) 100%);
+    border-left: 4px solid var(--bs-info);
+    color: #d9f5fc;
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 193, 7, 0.2) 100%);
+    border-left: 4px solid var(--bs-warning);
+    color: #fff3cd;
+}
+
+/* Buttons */
+.btn {
+    border-radius: 10px;
+    padding: 8px 16px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 0.875rem;
+}
+
+.btn-primary {
+    background: var(--primary-gradient);
+    border: none;
+}
+
+.btn-secondary {
+    background: var(--secondary-gradient);
+    border: none;
+}
+
+.btn-success {
+    background: var(--success-gradient);
+    border: none;
+}
+
+.btn-danger {
+    background: var(--danger-gradient);
+    border: none;
+}
+
+.btn-warning {
+    background: var(--warning-gradient);
+    border: none;
+}
+
+.btn-info {
+    background: var(--info-gradient);
+    border: none;
+}
+
+/* Error Messages */
 .camera-error {
     color: var(--bs-danger);
     text-align: center;
     padding: 20px;
-    background-color: rgba(220, 53, 69, 0.1);
-    border-radius: 5px;
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.05) 0%, rgba(220, 53, 69, 0.1) 100%);
+    border-radius: 10px;
     margin-top: 20px;
+    border-left: 4px solid var(--bs-danger);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.4s ease forwards;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .card-title {
+        font-size: 1.2rem;
+    }
+    
+    .page-title {
+        font-size: 1.5rem;
+    }
+    
+    .table thead th {
+        font-size: 0.9rem;
+    }
+    
+    .table tbody td {
+        font-size: 0.85rem;
+    }
 }

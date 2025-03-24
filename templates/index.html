@@ -1,48 +1,98 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="row">
+<div class="row fade-in">
     <div class="col-lg-8 offset-lg-2">
-        <h1 class="text-center page-title">Attendance Tracking</h1>
+        <h1 class="text-center page-title">
+            <i class="bi bi-camera-video-fill text-primary me-2"></i>
+            <span class="gradient-text">Attendance Tracking</span>
+        </h1>
         
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-camera me-2"></i>Face Recognition
+        <div class="card mb-4 shadow-lg">
+            <div class="card-header bg-primary bg-gradient text-white">
+                <h5 class="mb-0 d-flex align-items-center">
+                    <i class="bi bi-camera me-2"></i>Face Recognition
                 </h5>
             </div>
             <div class="card-body">
-                <p class="text-center mb-3">Position your face in the camera frame and click the button to mark attendance.</p>
+                <div class="alert alert-info mb-3">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-info-circle-fill me-2 fs-4"></i>
+                        <div>Position your face in the camera frame and click the button to mark attendance.</div>
+                    </div>
+                </div>
                 
-                <div class="video-container">
+                <div class="video-container shadow">
                     <video id="videoElement" autoplay></video>
                 </div>
                 
-                <div class="controls">
-                    <button id="captureButton" class="btn btn-primary" onclick="captureFace()" disabled>
-                        <i class="fas fa-camera me-2"></i>Capture & Recognize
+                <div class="controls mt-4">
+                    <button id="captureButton" class="btn btn-primary btn-lg shadow-sm" onclick="captureFace()" disabled>
+                        <i class="bi bi-camera-fill me-2"></i>Capture & Recognize
                     </button>
                 </div>
                 
-                <div id="recognitionResult" class="recognition-result">
-                    <p class="text-center text-muted">Recognition results will appear here</p>
+                <div id="recognitionResult" class="recognition-result mt-4">
+                    <div class="d-flex justify-content-center align-items-center text-muted">
+                        <i class="bi bi-hourglass me-2"></i>
+                        <p class="mb-0">Recognition results will appear here</p>
+                    </div>
                 </div>
             </div>
         </div>
         
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-info-circle me-2"></i>Instructions
+        <div class="card shadow">
+            <div class="card-header bg-info bg-gradient text-white">
+                <h5 class="mb-0 d-flex align-items-center">
+                    <i class="bi bi-info-circle me-2"></i>Instructions
                 </h5>
             </div>
             <div class="card-body">
-                <ol>
-                    <li>Make sure your face is clearly visible in the camera.</li>
-                    <li>Good lighting helps with recognition accuracy.</li>
-                    <li>Click the "Capture & Recognize" button to mark your attendance.</li>
-                    <li>If you're not recognized, please enroll in the system first.</li>
-                </ol>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="d-flex mb-3">
+                            <div class="me-3 text-primary">
+                                <i class="bi bi-1-circle-fill fs-3"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold">Face Visibility</h6>
+                                <p class="mb-0">Make sure your face is clearly visible in the camera frame.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex mb-3">
+                            <div class="me-3 text-primary">
+                                <i class="bi bi-2-circle-fill fs-3"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold">Good Lighting</h6>
+                                <p class="mb-0">Ensure proper lighting for better recognition accuracy.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="d-flex mb-3">
+                            <div class="me-3 text-primary">
+                                <i class="bi bi-3-circle-fill fs-3"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold">Capture Image</h6>
+                                <p class="mb-0">Click the "Capture & Recognize" button to mark attendance.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex">
+                            <div class="me-3 text-primary">
+                                <i class="bi bi-4-circle-fill fs-3"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold">Not Recognized?</h6>
+                                <p class="mb-0">If not recognized, please <a href="/enrollment" class="text-decoration-none">enroll</a> first.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
