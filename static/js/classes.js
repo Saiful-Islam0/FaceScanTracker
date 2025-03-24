@@ -35,6 +35,7 @@ function displayClasses(classes) {
     
     classes.forEach(classItem => {
         const createDate = new Date(classItem.created_at).toLocaleDateString();
+        const isDefault = classItem.id === 'default';
         
         html += `
             <div class="list-group-item">
@@ -42,7 +43,14 @@ function displayClasses(classes) {
                     <h5 class="mb-1">${classItem.name}</h5>
                     <small class="text-muted">Created: ${createDate}</small>
                 </div>
-                <p class="mb-1">Class ID: ${classItem.id}</p>
+                <div class="d-flex justify-content-between align-items-center">
+                    <p class="mb-1">Class ID: ${classItem.id}</p>
+                    ${!isDefault ? `
+                    <button class="btn btn-danger btn-sm delete-class" data-id="${classItem.id}">
+                        <i class="bi bi-trash"></i> Delete
+                    </button>
+                    ` : ''}
+                </div>
             </div>
         `;
     });
@@ -178,6 +186,34 @@ function populateClassDropdowns(classes) {
     });
 }
 
+// Delete a class
+async function deleteClass(classId) {
+    if (!confirm('Are you sure you want to delete this class? All students in this class will be moved to the Default Class.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/classes/${classId}`, {
+            method: 'DELETE'
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert(`Class deleted successfully. ${data.message}`);
+            
+            // Reload data
+            loadClasses();
+            loadEnrollments();
+        } else {
+            alert(`Error deleting class: ${data.error}`);
+        }
+    } catch (error) {
+        console.error('Error deleting class:', error);
+        alert('An error occurred while deleting the class. Please try again.');
+    }
+}
+
 // Set up event listeners
 function setupEventListeners() {
     // Class creation form
@@ -228,6 +264,20 @@ function setupEventListeners() {
     if (classFilter) {
         classFilter.addEventListener('change', function() {
             loadEnrollments();
+        });
+    }
+    
+    // Class deletion
+    const classesContainer = document.getElementById('classesContainer');
+    if (classesContainer) {
+        classesContainer.addEventListener('click', function(e) {
+            const deleteBtn = e.target.closest('.delete-class');
+            if (deleteBtn) {
+                const classId = deleteBtn.dataset.id;
+                if (classId) {
+                    deleteClass(classId);
+                }
+            }
         });
     }
 }

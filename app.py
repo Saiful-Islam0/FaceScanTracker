@@ -324,6 +324,44 @@ def get_enrollments():
         logger.exception("Error getting enrollments")
         return jsonify({'success': False, 'error': str(e)}), 500
 
+@app.route('/api/enrollments/<enrollment_id>', methods=['DELETE'])
+def delete_enrollment(enrollment_id):
+    try:
+        # Load enrollments
+        with open(ENROLLMENTS_FILE, 'r') as f:
+            enrollments = json.load(f)
+        
+        # Find the enrollment to delete
+        enrollment_index = None
+        for i, enrollment in enumerate(enrollments):
+            if enrollment['id'] == enrollment_id:
+                enrollment_index = i
+                break
+        
+        if enrollment_index is None:
+            return jsonify({'success': False, 'error': 'Enrollment not found'}), 404
+        
+        # Remove the enrollment image if it exists
+        deleted_enrollment = enrollments[enrollment_index]
+        if 'image_path' in deleted_enrollment and os.path.exists(deleted_enrollment['image_path']):
+            try:
+                os.remove(deleted_enrollment['image_path'])
+            except Exception as e:
+                logger.warning(f"Could not delete enrollment image: {e}")
+        
+        # Remove the enrollment
+        enrollments.pop(enrollment_index)
+        
+        # Save updated enrollments
+        with open(ENROLLMENTS_FILE, 'w') as f:
+            json.dump(enrollments, f)
+        
+        return jsonify({'success': True, 'message': 'Enrollment deleted successfully'})
+    
+    except Exception as e:
+        logger.exception("Error deleting enrollment")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @app.route('/classes')
 def classes():
     return render_template('classes.html')
@@ -380,6 +418,58 @@ def create_class():
     
     except Exception as e:
         logger.exception("Error creating class")
+        return jsonify({'success': False, 'error': str(e)}), 500
+        
+@app.route('/api/classes/<class_id>', methods=['DELETE'])
+def delete_class(class_id):
+    try:
+        # Don't allow deletion of the default class
+        if class_id == 'default':
+            return jsonify({'success': False, 'error': 'Cannot delete the default class'}), 400
+        
+        # Load classes
+        with open(CLASSES_FILE, 'r') as f:
+            classes = json.load(f)
+        
+        # Find the class to delete
+        class_index = None
+        for i, cls in enumerate(classes):
+            if cls['id'] == class_id:
+                class_index = i
+                break
+        
+        if class_index is None:
+            return jsonify({'success': False, 'error': 'Class not found'}), 404
+        
+        # Remove the class
+        classes.pop(class_index)
+        
+        # Save updated classes
+        with open(CLASSES_FILE, 'w') as f:
+            json.dump(classes, f)
+        
+        # Update all enrollments that were in this class to be in the default class
+        with open(ENROLLMENTS_FILE, 'r') as f:
+            enrollments = json.load(f)
+        
+        # Count how many enrollments were updated
+        updated_count = 0
+        for enrollment in enrollments:
+            if enrollment.get('class_id') == class_id:
+                enrollment['class_id'] = 'default'
+                updated_count += 1
+        
+        # Save updated enrollments
+        with open(ENROLLMENTS_FILE, 'w') as f:
+            json.dump(enrollments, f)
+        
+        return jsonify({
+            'success': True, 
+            'message': f'Class deleted successfully. {updated_count} enrollments moved to Default Class.'
+        })
+    
+    except Exception as e:
+        logger.exception("Error deleting class")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/attendance', methods=['GET'])

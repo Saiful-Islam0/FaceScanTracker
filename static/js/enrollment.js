@@ -102,8 +102,15 @@ async function loadEnrollments() {
                 enrollItem.className = 'card mb-2';
                 enrollItem.innerHTML = `
                     <div class="card-body">
-                        <h5 class="card-title">${enrollment.name}</h5>
-                        <p class="card-text text-muted">Enrolled: ${formattedDate}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="card-title">${enrollment.name}</h5>
+                                <p class="card-text text-muted">Enrolled: ${formattedDate}</p>
+                            </div>
+                            <button class="btn btn-danger btn-sm delete-enrollment" data-id="${enrollment.id}">
+                                <i class="bi bi-trash"></i> Delete
+                            </button>
+                        </div>
                     </div>
                 `;
                 
@@ -262,6 +269,45 @@ if (enrollmentForm) {
         } finally {
             // Re-enable enroll button
             enrollButton.disabled = false;
+        }
+    });
+}
+
+// Delete enrollment function
+async function deleteEnrollment(enrollmentId) {
+    if (!confirm('Are you sure you want to delete this student? This action cannot be undone.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/enrollments/${enrollmentId}`, {
+            method: 'DELETE'
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Reload enrollments after deletion
+            loadEnrollments();
+            alert('Student deleted successfully');
+        } else {
+            alert(`Error deleting student: ${data.error}`);
+        }
+    } catch (error) {
+        console.error('Error deleting enrollment:', error);
+        alert('An error occurred while deleting the student. Please try again.');
+    }
+}
+
+// Add event listener for delete buttons
+if (enrollmentList) {
+    enrollmentList.addEventListener('click', event => {
+        const deleteBtn = event.target.closest('.delete-enrollment');
+        if (deleteBtn) {
+            const enrollmentId = deleteBtn.dataset.id;
+            if (enrollmentId) {
+                deleteEnrollment(enrollmentId);
+            }
         }
     });
 }
