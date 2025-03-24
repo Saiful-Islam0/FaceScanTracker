@@ -27,6 +27,35 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 if not os.path.exists(ENROLLMENTS_FILE):
     with open(ENROLLMENTS_FILE, 'w') as f:
         json.dump([], f)
+else:
+    # Check if we need to update existing enrollments to the new format
+    try:
+        with open(ENROLLMENTS_FILE, 'r') as f:
+            enrollments = json.load(f)
+            
+        updated = False
+        
+        # Check each enrollment for the new features format
+        for enrollment in enrollments:
+            if 'encoding' in enrollment and 'features' not in enrollment['encoding'] and 'image_path' in enrollment:
+                # This enrollment needs to be updated to the new format
+                logger.info(f"Updating enrollment for {enrollment['name']}")
+                
+                # Re-process the image to get the new encoding format
+                if os.path.exists(enrollment['image_path']):
+                    new_encoding = face_utils.extract_face_encoding(enrollment['image_path'])
+                    if new_encoding:
+                        enrollment['encoding'] = new_encoding
+                        updated = True
+        
+        # Save updated enrollments if any were changed
+        if updated:
+            logger.info("Saving updated enrollments with new feature format")
+            with open(ENROLLMENTS_FILE, 'w') as f:
+                json.dump(enrollments, f)
+                
+    except Exception as e:
+        logger.exception("Error updating enrollments to new format")
 
 # Initialize attendance records if file doesn't exist
 if not os.path.exists(ATTENDANCE_FILE):
