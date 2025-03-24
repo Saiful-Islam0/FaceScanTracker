@@ -709,13 +709,25 @@ def query_attendance():
                 'requires_class': False
             })
 
-        # Handle class-specific attendance queries
+        # Handle attendance queries for all classes if no specific class selected
         if ('who was present' in query or 'who was absent' in query) and not class_id:
+            response = []
+            for class_info in classes:
+                class_id = class_info['id']
+                class_name = class_info['name']
+                class_enrollments = [e for e in enrollments if e.get('class_id') == class_id]
+                
+                if today in attendance_data:
+                    present_ids = [r['id'] for r in attendance_data[today] if r.get('class_id') == class_id]
+                    names = [e['name'] for e in class_enrollments if e['id'] in present_ids]
+                    if names:
+                        response.append(f"{class_name}: {', '.join(names)}")
+                    else:
+                        response.append(f"{class_name}: No students present")
+            
             return jsonify({
                 'success': True,
-                'response': "Please select a class:",
-                'requires_class': True,
-                'classes': [{'id': c['id'], 'name': c['name']} for c in classes]
+                'response': "Present today:\n" + "\n".join(response)
             })
 
         # Total students query
