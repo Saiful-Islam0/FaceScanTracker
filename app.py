@@ -678,6 +678,115 @@ def export_attendance_csv():
         return redirect(url_for('records'))
 
 @app.route('/export_attendance_pdf')
+def export_attendance_pdf():
+    try:
+        # Optional filters
+        date = request.args.get('date', None)
+        class_id = request.args.get('class_id', None)
+        
+        # Load attendance data
+        with open(ATTENDANCE_FILE, 'r') as f:
+            attendance_data = json.load(f)
+        
+        # Load enrollments for name lookup
+        with open(ENROLLMENTS_FILE, 'r') as f:
+            enrollments = json.load(f)
+            id_to_info = {e['id']: {'name': e['name'], 'class_id': e.get('class_id', 'default')} for e in enrollments}
+        
+        # Load classes for class name lookup
+        with open(CLASSES_FILE, 'r') as f:
+            classes = json.load(f)
+            class_names = {c['id']: c['name'] for c in classes}
+            
+        # Filter by date if specified
+        if date and date in attendance_data:
+            filtered_data = {date: attendance_data[date]}
+        else:
+            filtered_data = attendance_data
+            
+        # Create a PDF
+        pdf = FPDF()
+        pdf.add_page()
+        
+        # Set up PDF styling
+        pdf.set_font("Arial", 'B', 16)
+        pdf.cell(0, 10, "Attendance Report", 0, 1, 'C')
+        pdf.set_font("Arial", 'I', 10)
+        pdf.cell(0, 10, f"Generated on {datetime.now().strftime('%Y-%m-%d at %H:%M:%S')}", 0, 1, 'C')
+        pdf.ln(10)
+        
+        if class_id:
+            class_name = class_names.get(class_id, 'Unknown Class')
+            pdf.set_font("Arial", 'B', 12)
+            pdf.cell(0, 10, f"Class: {class_name}", 0, 1)
+        
+        # Set up the table headers
+        pdf.set_font("Arial", 'B', 12)
+        pdf.cell(60, 10, "Name", 1, 0)
+        pdf.cell(40, 10, "Class", 1, 0)
+        pdf.cell(30, 10, "Date", 1, 0)
+        pdf.cell(30, 10, "Time", 1, 1)
+        
+        # Add data rows
+        pdf.set_font("Arial", '', 10)
+        
+        # Collect and sort all records
+        all_records = []
+        for curr_date, records in filtered_data.items():
+            for record in records:
+                person_id = record['id']
+                person_info = id_to_info.get(person_id, {'name': f"Unknown ({person_id})", 'class_id': 'default'})
+                
+                # Filter by class if requested
+                if class_id and person_info['class_id'] != class_id:
+                    continue
+                
+                record_class_id = record.get('class_id', person_info['class_id'])
+                class_name = class_names.get(record_class_id, 'Unknown Class')
+                
+                all_records.append({
+                    'name': person_info['name'],
+                    'class': class_name,
+                    'date': curr_date,
+                    'time': record['time']
+                })
+        
+        # Sort by date and time
+        all_records.sort(key=lambda x: (x['date'], x['time']), reverse=True)
+        
+        # Add records to PDF
+        for record in all_records:
+            # Check if we need to add a new page
+            if pdf.get_y() > 250:
+                pdf.add_page()
+                # Re-add headers on new page
+                pdf.set_font("Arial", 'B', 12)
+                pdf.cell(60, 10, "Name", 1, 0)
+                pdf.cell(40, 10, "Class", 1, 0)
+                pdf.cell(30, 10, "Date", 1, 0)
+                pdf.cell(30, 10, "Time", 1, 1)
+                pdf.set_font("Arial", '', 10)
+            
+            pdf.cell(60, 10, record['name'], 1, 0)
+            pdf.cell(40, 10, record['class'], 1, 0)
+            pdf.cell(30, 10, record['date'], 1, 0)
+            pdf.cell(30, 10, record['time'], 1, 1)
+        
+        # Output the PDF
+        pdf_output = pdf.output(dest='S').encode('latin-1')
+        filename = f"attendance_{datetime.now().strftime('%Y%m%d')}.pdf"
+        
+        return Response(
+            pdf_output,
+            mimetype="application/pdf",
+            headers={"Content-Disposition": f"attachment;filename={filename}"}
+        )
+    
+    except Exception as e:
+        logger.exception("Error exporting attendance to PDF")
+        flash('Error exporting data. Please try again.', 'error')
+        return redirect(url_for('records'))
+
 @app.route('/chatbot')
 def chatbot():
     return render_template('chatbot.html')

@@ -73,12 +73,26 @@ function sendMessage(customQuery = null, isClassSelection = false) {
     input.value = '';
 }
 
+function typeWriter(messageDiv, text, index = 0) {
+    if (index < text.length) {
+        messageDiv.textContent += text.charAt(index);
+        setTimeout(() => typeWriter(messageDiv, text, index + 1), 25);
+    }
+}
+
 function appendMessage(message, className) {
     const container = document.getElementById('chat-messages');
     const messageDiv = document.createElement('div');
     messageDiv.className = 'mb-2 ' + className;
-    messageDiv.textContent = message;
     container.appendChild(messageDiv);
+    
+    if (className.includes('text-start')) { // Only animate AI responses
+        messageDiv.textContent = 'Assistant: ';
+        typeWriter(messageDiv, message.replace('Assistant: ', ''));
+    } else {
+        messageDiv.textContent = message;
+    }
+    
     container.scrollTop = container.scrollHeight;
 }
 
