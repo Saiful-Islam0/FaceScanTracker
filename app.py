@@ -678,6 +678,132 @@ def export_attendance_csv():
         return redirect(url_for('records'))
 
 @app.route('/export_attendance_pdf')
+def process_attendance_query(query):
+    # Load necessary data
+    with open(ATTENDANCE_FILE, 'r') as f:
+        attendance_data = json.load(f)
+    
+    with open(ENROLLMENTS_FILE, 'r') as f:
+        enrollments = json.load(f)
+        id_to_info = {e['id']: {'name': e['name'], 'class_id': e.get('class_id', 'default')} 
+                     for e in enrollments}
+    
+    # Get all enrolled students
+    all_students = set(id_to_info.keys())
+    
+    query = query.lower()
+    response = ""
+    
+    if "present" in query and "today" in query:
+        today = datetime.now().strftime('%Y-%m-%d')
+        if today in attendance_data:
+            present_ids = set(record['id'] for record in attendance_data[today])
+            present_names = [id_to_info[pid]['name'] for pid in present_ids if pid in id_to_info]
+            response = f"Students present today ({today}): {', '.join(present_names)}"
+        else:
+            response = "No attendance records for today."
+    
+    elif "absent" in query and "today" in query:
+        today = datetime.now().strftime('%Y-%m-%d')
+        if today in attendance_data:
+            present_ids = set(record['id'] for record in attendance_data[today])
+            absent_ids = all_students - present_ids
+            absent_names = [id_to_info[pid]['name'] for pid in absent_ids if pid in id_to_info]
+            response = f"Students absent today ({today}): {', '.join(absent_names)}"
+        else:
+            response = "No attendance records for today."
+    
+    elif "trends" in query or "summary" in query:
+        # Calculate attendance trends
+        attendance_rates = {}
+        for date, records in attendance_data.items():
+            present_count = len(set(record['id'] for record in records))
+            attendance_rates[date] = (present_count / len(all_students)) * 100
+        
+        avg_attendance = sum(attendance_rates.values()) / len(attendance_rates) if attendance_rates else 0
+        response = f"Average attendance rate: {avg_attendance:.1f}%\n"
+        response += "Trend: "
+        if avg_attendance > 90:
+            response += "Excellent attendance overall"
+        elif avg_attendance > 75:
+            response += "Good attendance with room for improvement"
+        else:
+            response += "Attendance needs attention"
+            
+    return response
+
+@app.route('/api/attendance/query', methods=['POST'])
+def attendance_query():
+    try:
+        query = request.json.get('query', '')
+        if not query:
+            return jsonify({'success': False, 'error': 'No query provided'}), 400
+            
+        response = process_attendance_query(query)
+        return jsonify({'success': True, 'response': response})
+    
+    except Exception as e:
+        logger.exception("Error processing attendance query")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/attendance/report', methods=['GET'])
+def generate_attendance_report():
+    try:
+        report_type = request.args.get('type', 'daily')  # daily, weekly, monthly
+        
+        with open(ATTENDANCE_FILE, 'r') as f:
+            attendance_data = json.load(f)
+            
+        with open(ENROLLMENTS_FILE, 'r') as f:
+            enrollments = json.load(f)
+            id_to_info = {e['id']: {'name': e['name'], 'class_id': e.get('class_id', 'default')} 
+                         for e in enrollments}
+        
+        today = datetime.now()
+        report = {'type': report_type, 'data': {}}
+        
+        if report_type == 'daily':
+            date_str = today.strftime('%Y-%m-%d')
+            if date_str in attendance_data:
+                present_ids = set(record['id'] for record in attendance_data[date_str])
+                report['data'] = {
+                    'date': date_str,
+                    'present': [{'name': id_to_info[pid]['name'], 'id': pid} 
+                              for pid in present_ids if pid in id_to_info],
+                    'absent': [{'name': id_to_info[pid]['name'], 'id': pid} 
+                             for pid in set(id_to_info.keys()) - present_ids]
+                }
+        
+        elif report_type == 'weekly':
+            # Get last 7 days
+            for i in range(7):
+                date = today - pd.Timedelta(days=i)
+                date_str = date.strftime('%Y-%m-%d')
+                if date_str in attendance_data:
+                    present_ids = set(record['id'] for record in attendance_data[date_str])
+                    report['data'][date_str] = {
+                        'present_count': len(present_ids),
+                        'absent_count': len(set(id_to_info.keys()) - present_ids)
+                    }
+        
+        elif report_type == 'monthly':
+            # Get last 30 days
+            for i in range(30):
+                date = today - pd.Timedelta(days=i)
+                date_str = date.strftime('%Y-%m-%d')
+                if date_str in attendance_data:
+                    present_ids = set(record['id'] for record in attendance_data[date_str])
+                    report['data'][date_str] = {
+                        'present_count': len(present_ids),
+                        'absent_count': len(set(id_to_info.keys()) - present_ids)
+                    }
+        
+        return jsonify({'success': True, 'report': report})
+    
+    except Exception as e:
+        logger.exception("Error generating attendance report")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 def export_attendance_pdf():
     try:
         # Optional filters
