@@ -99,7 +99,7 @@ def calculate_region_similarity(regions1, regions2):
     
     return similarity
 
-def find_matching_face(face_encoding, enrollments, tolerance=0.70):
+def find_matching_face(face_encoding, enrollments, tolerance=0.60):
     """
     Find a matching face in the enrollments using image features
     
@@ -160,8 +160,16 @@ def find_matching_face(face_encoding, enrollments, tolerance=0.70):
                 region_similarity = calculate_region_similarity(query_regions, enroll_regions)
             
             # Combine scores (weighted average)
-            # Weight perceptual hash more heavily as it's more reliable
-            combined_score = (0.7 * phash_similarity) + (0.3 * region_similarity)
+            # Adjust weights to give even more importance to perceptual hash
+            # and also use the traditional hash as a fallback
+            
+            # Check if traditional hash matches exactly - if so, boost the score
+            hash_boost = 0.0
+            if face_encoding.get('hash') == enrollment['encoding'].get('hash'):
+                hash_boost = 0.2  # Big boost for exact match
+                
+            # Calculate combined score with adjusted weights and potential boost
+            combined_score = (0.8 * phash_similarity) + (0.2 * region_similarity) + hash_boost
             
             logger.debug(f"Comparing with {enrollment['name']}: score {combined_score:.4f}")
             
@@ -173,7 +181,28 @@ def find_matching_face(face_encoding, enrollments, tolerance=0.70):
         if best_match:
             logger.info(f"Found match: {best_match['name']} with score {best_score:.4f}")
         else:
-            logger.info(f"No match found. Best score was {best_score:.4f}")
+            # Find the closest match for debugging purposes
+            closest_name = "none"
+            closest_score = 0
+            
+            for enrollment in enrollments:
+                if 'encoding' not in enrollment:
+                    continue
+                    
+                name = enrollment.get('name', 'unknown')
+                query_phash = face_encoding['features'].get('phash', '')
+                
+                if 'features' in enrollment['encoding'] and 'phash' in enrollment['encoding']['features']:
+                    enroll_phash = enrollment['encoding']['features']['phash']
+                    # Quick hamming distance check
+                    hamming_dist = calculate_hamming_distance(query_phash, enroll_phash)
+                    if hamming_dist >= 0:
+                        score = 1 - (hamming_dist / 64)
+                        if score > closest_score:
+                            closest_score = score
+                            closest_name = name
+            
+            logger.info(f"No match found. Best score was {best_score:.4f}, closest was {closest_name} with raw pHash score {closest_score:.4f}")
             
         return best_match
     
