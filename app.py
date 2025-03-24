@@ -682,6 +682,53 @@ def export_attendance_csv():
 def chatbot():
     return render_template('chatbot.html')
 
+@app.route('/api/attendance/query', methods=['POST'])
+def query_attendance():
+    try:
+        data = request.get_json()
+        query = data.get('query', '').lower()
+
+        # Load attendance data
+        with open(ATTENDANCE_FILE, 'r') as f:
+            attendance_data = json.load(f)
+        
+        # Load enrollments for name lookup
+        with open(ENROLLMENTS_FILE, 'r') as f:
+            enrollments = json.load(f)
+            id_to_name = {e['id']: e['name'] for e in enrollments}
+
+        today = datetime.now().strftime('%Y-%m-%d')
+        
+        if 'who was present' in query and 'today' in query:
+            if today in attendance_data:
+                present_ids = [r['id'] for r in attendance_data[today]]
+                names = [id_to_name.get(id, f"Unknown ({id})") for id in present_ids]
+                return jsonify({'success': True, 'response': f"Present today: {', '.join(names)}"})
+            return jsonify({'success': True, 'response': "No attendance records for today"})
+            
+        elif 'who was absent' in query and 'today' in query:
+            if today in attendance_data:
+                present_ids = [r['id'] for r in attendance_data[today]]
+                absent_ids = [e['id'] for e in enrollments if e['id'] not in present_ids]
+                names = [id_to_name.get(id, f"Unknown ({id})") for id in absent_ids]
+                return jsonify({'success': True, 'response': f"Absent today: {', '.join(names)}"})
+            return jsonify({'success': True, 'response': "No attendance records for today"})
+            
+        elif 'attendance trend' in query:
+            total_enrolled = len(enrollments)
+            dates = sorted(attendance_data.keys(), reverse=True)[:7]  # Last 7 days
+            if dates:
+                trends = [f"{date}: {len(attendance_data[date])}/{total_enrolled} present" for date in dates]
+                return jsonify({'success': True, 'response': "Recent attendance trends:\n" + "\n".join(trends)})
+            return jsonify({'success': True, 'response': "No recent attendance records found"})
+            
+        else:
+            return jsonify({'success': True, 'response': "I can help you with:\n- Who was present today?\n- Who was absent today?\n- Show attendance trends"})
+
+    except Exception as e:
+        logger.exception("Error processing chatbot query")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 def export_attendance_pdf():
     try:
         # Optional filters
