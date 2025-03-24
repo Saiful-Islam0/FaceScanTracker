@@ -1,99 +1,116 @@
 {% extends "layout.html" %}
 
+{% block title %}Attendance Analytics{% endblock %}
+
 {% block content %}
-<div class="row">
-    <div class="col-lg-10 offset-lg-1">
-        <h1 class="text-center page-title">Attendance Analytics</h1>
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Attendance Analytics</h1>
+            
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-download me-1"></i> Export
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+                    <li><a class="dropdown-item" href="/export_attendance_csv"><i class="fas fa-file-csv me-1"></i> CSV</a></li>
+                    <li><a class="dropdown-item" href="/export_attendance_pdf"><i class="fas fa-file-pdf me-1"></i> PDF</a></li>
+                </ul>
+            </div>
+        </div>
         
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-chart-pie me-2"></i>Summary
-                        </h5>
+        <!-- Summary Stats -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Summary</h5>
+            </div>
+            <div class="card-body">
+                <div id="analyticsStats" class="d-flex justify-content-around text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
                     </div>
-                    <div class="card-body">
-                        <div id="analyticsStats">
-                            <div class="d-flex justify-content-center">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Attendance Charts -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Attendance by Class</h5>
+                <div>
+                    <select class="form-select form-select-sm" id="classFilter">
+                        <option value="">All Classes</option>
+                    </select>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title text-center">Attendance by Date</h5>
+                                <div id="attendanceByDateChart" class="chart-container">
+                                    <img src="{{ url_for('attendance_by_date_chart') }}" class="img-fluid" alt="Attendance by Date Chart">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title text-center">Enrollment by Class</h5>
+                                <div id="enrollmentByClassChart" class="chart-container">
+                                    <img src="{{ url_for('enrollment_by_class_chart') }}" class="img-fluid" alt="Enrollment by Class Chart">
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-users me-2"></i>Class Distribution
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-container" style="position: relative; height: 300px;">
-                            <img src="{{ url_for('enrollment_by_class_chart') }}" alt="Class Enrollment Chart" class="img-fluid" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-calendar-check me-2"></i>Daily Attendance
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="chart-container" style="position: relative; height: 300px;">
-                    <img src="{{ url_for('attendance_by_date_chart') }}" alt="Daily Attendance Chart" class="img-fluid" />
-                </div>
-            </div>
-        </div>
-        
-        <div class="card">
-            <div class="card-header">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">
-                        <i class="fas fa-clipboard-list me-2"></i>Attendance by Class
-                    </h5>
-                    <select id="classFilter" class="form-select form-select-sm" style="width: auto;">
-                        <option value="">All Classes</option>
-                        <!-- Class options will be loaded dynamically -->
-                    </select>
-                </div>
-            </div>
-            <div class="card-body">
+                
                 <div id="classAttendance">
-                    <div class="d-flex justify-content-center">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card-footer">
-                <div class="d-flex justify-content-between align-items-center">
-                    <a href="{{ url_for('records') }}" class="btn btn-outline-primary">
-                        <i class="fas fa-list me-1"></i> View Detailed Records
-                    </a>
-                    <div class="dropdown">
-                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-download me-1"></i> Export Report
-                        </button>
-                        <ul class="dropdown-menu" aria-labelledby="exportDropdown">
-                            <li><a class="dropdown-item" href="{{ url_for('export_attendance_csv') }}">CSV Format</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('export_attendance_pdf') }}">PDF Format</a></li>
-                        </ul>
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+.analytics-summary {
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+    width: 100%;
+}
+
+.analytics-stat {
+    padding: 20px;
+    border-radius: 8px;
+    background-color: var(--bs-primary-bg-subtle);
+    min-width: 150px;
+}
+
+.analytics-stat-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.analytics-stat-label {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.chart-container {
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+</style>
 {% endblock %}
 
 {% block scripts %}

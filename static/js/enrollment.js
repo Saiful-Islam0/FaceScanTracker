@@ -12,6 +12,7 @@ let cameraStream = null;
 document.addEventListener('DOMContentLoaded', () => {
     initCamera();
     loadEnrollments();
+    loadClasses();
 });
 
 // Initialize camera
@@ -164,12 +165,44 @@ function startEnrollCountdown() {
     });
 }
 
+// Load classes for dropdown
+function loadClasses() {
+    const classSelect = document.getElementById('classSelect');
+    if (!classSelect) return;
+    
+    fetch('/api/classes')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Keep the first option (Default Class)
+                const defaultOption = classSelect.options[0];
+                classSelect.innerHTML = '';
+                classSelect.appendChild(defaultOption);
+                
+                // Add class options
+                data.classes.forEach(classItem => {
+                    const option = document.createElement('option');
+                    option.value = classItem.id;
+                    option.textContent = classItem.name;
+                    classSelect.appendChild(option);
+                });
+            } else {
+                console.error('Error loading classes:', data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching classes:', error);
+        });
+}
+
 // Handle enrollment form submission
 if (enrollmentForm) {
     enrollmentForm.addEventListener('submit', async function(event) {
         event.preventDefault();
         
         const name = nameInput.value.trim();
+        const classSelect = document.getElementById('classSelect');
+        const classId = classSelect ? classSelect.value : 'default';
         
         if (!name) {
             alert("Please enter a name");
@@ -191,6 +224,7 @@ if (enrollmentForm) {
             const formData = new FormData();
             formData.append('image', imageBlob, 'enrollment.jpg');
             formData.append('name', name);
+            formData.append('class_id', classId);
             
             // Send to server for enrollment
             const response = await fetch('/api/enroll', {

@@ -29,8 +29,8 @@
                                 <i class="fas fa-download me-1"></i> Export
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="exportDropdown">
-                                <li><a class="dropdown-item" href="#" id="exportCsv">CSV Format</a></li>
-                                <li><a class="dropdown-item" href="#" id="exportPdf">PDF Format</a></li>
+                                <li><a class="dropdown-item" href="#" id="exportCsvBtn" data-base-url="{{ url_for('export_attendance_csv') }}">CSV Format</a></li>
+                                <li><a class="dropdown-item" href="#" id="exportPdfBtn" data-base-url="{{ url_for('export_attendance_pdf') }}">PDF Format</a></li>
                             </ul>
                         </div>
                     </div>
@@ -50,7 +50,7 @@
                             </thead>
                             <tbody>
                                 {% for record in records %}
-                                <tr class="attendance-record" data-date="{{ record.date }}" data-class="{{ record.class_id }}">
+                                <tr class="attendance-record" data-date="{{ record.date }}" data-class-id="{{ record.class_id }}">
                                     <td>{{ record.name }}</td>
                                     <td class="class-name">{{ record.class_name if record.class_name else 'Default' }}</td>
                                     <td>{{ record.date }}</td>
