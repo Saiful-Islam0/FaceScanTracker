@@ -27,7 +27,7 @@ A Flask-based attendance management system with face recognition capabilities an
 
 1. Clone the repository:
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/Saiful-Islam0/FaceScanTracker.git
 cd face-recognition-attendance
 ```
 
