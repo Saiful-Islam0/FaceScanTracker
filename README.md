@@ -1,5 +1,5 @@
 
-# Face Recognition Attendance System
+# Face Recognition Attendance System.
 
 A Flask-based attendance management system with face recognition capabilities and AI assistance.
 
